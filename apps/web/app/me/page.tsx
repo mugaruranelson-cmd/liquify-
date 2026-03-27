@@ -10,7 +10,8 @@ import {
   Clock,
   LogOut,
   Bell,
-  CreditCard
+  CreditCard,
+  ArrowUpRight
 } from "lucide-react";
 import { ScoreGauge, formatKES } from "@repo/ui";
 
