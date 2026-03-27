@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Liquify — Smart Credit for Informal Retail",
-  description: "Behavior-based credit intelligence platform for shops in Kenya.",
+  title: "Liquify Admin — Platform Management",
+  description: "Internal admin portal for Liquidify.",
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans`}>
+      <body className={`${inter.variable} font-sans bg-slate-50 text-slate-900`}>
         {children}
       </body>
     </html>

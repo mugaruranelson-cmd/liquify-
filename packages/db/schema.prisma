@@ -1,0 +1,137 @@
+// packages/db/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Merchant {
+  id              String    @id @default(cuid())
+  shopName        String
+  phoneNumber     String    @unique        // Primary identifier
+  ownerName       String
+  idNumber        String?
+  location        String                  // Area / estate
+  county          String?
+  latitude        Float?
+  longitude       Float?
+  plan            String    @default("FREE")
+  status          String    @default("PENDING")
+  mpesaShortcode  String?
+  mpesaTillNumber String?
+  defaultCreditLimit    Int  @default(1000)   // KES
+  repaymentDays         Int  @default(30)
+  riskTolerance         String @default("BALANCED")
+  whatsappEnabled       Boolean @default(true)
+  smsEnabled            Boolean @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  customers       Customer[]
+  staff           StaffMember[]
+  transactions    Transaction[]
+  campaigns       Campaign[]
+}
+
+model Customer {
+  id              String    @id @default(cuid())
+  merchantId      String
+  merchant        Merchant  @relation(fields: [merchantId], references: [id])
+  fullName        String
+  phoneNumber     String                  // Not globally unique — same customer at diff shops
+  idNumber        String?
+  location        String?
+  referralSource  String?
+  liquifyScore    Int       @default(0)   // 0–100
+  creditTier      String    @default("BRONZE")
+  creditLimit     Int       @default(1000) // KES — merchant-set, score-adjusted
+  outstandingBalance Int    @default(0)   // KES in cents (store as Int to avoid float errors)
+  totalPointsEarned  Int    @default(0)
+  pointsBalance      Int    @default(0)
+  visitCount         Int    @default(0)
+  lastVisitAt        DateTime?
+  isBlacklisted      Boolean @default(false)
+  blacklistReason    String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  transactions       Transaction[]
+  scoreHistory       ScoreEvent[]
+  messages           Message[]
+  @@unique([merchantId, phoneNumber])    // One profile per shop per phone
+}
+
+model Transaction {
+  id              String    @id @default(cuid())
+  merchantId      String
+  merchant        Merchant  @relation(fields: [merchantId], references: [id])
+  customerId      String
+  customer        Customer  @relation(fields: [customerId], references: [id])
+  type            String                 // CREDIT_ISSUED | PAYMENT | ADJUSTMENT | WRITEOFF
+  amount          Int                    // KES in cents
+  description     String?
+  paymentMethod   String?               // CASH | MPESA | BANK
+  mpesaRef        String?
+  dueDate         DateTime?
+  status          String    @default("PENDING")
+  isLate          Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?               // StaffMember id or "system"
+}
+
+model ScoreEvent {
+  id          String    @id @default(cuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  scoreBefore Int
+  scoreAfter  Int
+  delta       Int
+  reason      String                    // "on_time_payment" | "late_payment" | "default" etc
+  createdAt   DateTime  @default(now())
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  channel     String                    // WHATSAPP | SMS
+  templateKey String                    // "reminder_due_today" | "overdue_3d" etc
+  body        String
+  status      String    @default("SENT")
+  deliveredAt DateTime?
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model StaffMember {
+  id          String    @id @default(cuid())
+  merchantId  String
+  merchant    Merchant  @relation(fields: [merchantId], references: [id])
+  fullName    String
+  phoneNumber String
+  role        String    @default("CASHIER") // OWNER | CASHIER
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+}
+
+model OtpSession {
+  id          String    @id @default(cuid())
+  phoneNumber String
+  otp         String                    // Hashed
+  expiresAt   DateTime
+  verified    Boolean   @default(false)
+  attempts    Int       @default(0)
+  createdAt   DateTime  @default(now())
+}
+
+model Campaign {
+  id          String    @id @default(cuid())
+  merchantId  String
+  merchant    Merchant  @relation(fields: [merchantId], references: [id])
+  name        String
+  createdAt   DateTime  @default(now())
+}
+

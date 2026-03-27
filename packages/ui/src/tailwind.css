@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-teal: 29 158 117;
+    --brand-purple: 127 119 221;
+    
+    --tier-bronze: 205 127 50;
+    --tier-silver: 148 163 184;
+    --tier-gold: 239 159 39;
+    --tier-platinum: 127 119 221;
+  }
+}
