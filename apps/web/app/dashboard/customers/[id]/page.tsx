@@ -10,9 +10,11 @@ import {
   ArrowUpRight,
   TrendingUp,
   CreditCard,
-  Plus
+  Plus,
+  ShieldCheck
 } from "lucide-react";
 import { ScoreGauge, TierBadge, formatKES, displayPhone } from "@repo/ui";
+import { cn } from "../../../../lib/utils";
 
 export default function CustomerDetailPage({ params }: { params: { id: string } }) {
   // Mock data for a single customer
